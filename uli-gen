@@ -1,0 +1,60 @@
+#!/bin/sh
+
+help () {
+	echo "  Help for uli-gen"
+	echo "  "
+	echo "  uli-gen helps generate universal linux installers"
+	echo "  uli-gen can be used in following modes"
+	echo "  -i : Initialise a uli package, with a uli.cfg file"
+	echo "  -c : Create a .uli package"
+	echo "  -h : Show this help text"
+	echo "  "
+	echo "  "
+	echo "  Usage: uli-gen -i [dir]"
+	echo "  "
+	echo "  	dir = Directory to create. (Optional, creates in current directory if not provided"
+	echo "  "
+	echo "  "
+	echo "  Usage: uli-gen -c dir [uli]"
+	echo "  "
+	echo "  	dir = directory which completely contains all files required to distribute"
+	echo "  	uli = output .uli file. (Optional, saved to dir/appname.uli) otherwise"
+	echo "  "
+	echo "  NOTE: The dir must conatin a uli.cfg file"
+	exit 1
+}
+
+uli_init () {
+	DIR=$1
+	echo "  Distribution directory is : ${1}"
+	exit 0
+}
+
+uli_create () {
+	DIR=$1
+	ULI=$2
+	echo "  Distribution directory is : ${1}"
+	exit 0
+}
+
+while getopts “hi:c:” OPTION
+do
+     case $OPTION in
+         h)
+             help
+             ;;
+         i)
+             shift $(( OPTIND - 2 ))
+             uli_init $@
+             ;;
+         c)
+             shift $(( OPTIND - 2 ))
+             uli_create $@
+             ;;
+         ?)
+             echo "  Wrong argument passed !"
+             help
+             ;;
+     esac
+done
+exit 0;
