@@ -26,10 +26,45 @@ help () {
 
 install_template_start() {
 #!/bin/bash
+if [ "$USER" != "root" ]; then
+	echo ""
+	echo " Must perform installation as root"
+	echo " Aborting"
+	exit 1
+fi
 export TMPDIR=`mktemp -d /tmp/uli.XXXXXX`
 echo " Temporarily extracting to ${TMPDIR}"
 ARCHIVE=`awk '/^__ARCHIVE_STARTS__/ {print NR + 1; exit 0; }' $0`
 tail -n+$ARCHIVE $0 | tar xv -C $TMPDIR
+
+source $TMPDIR/uli.cfg
+
+if [ -n "$preinstall" ]; then
+	echo " Running preinstall scripts"
+	cd $TMPDIR
+	( exec "./${preinstall}" )
+fi
+
+export INSTALLDIR="${install_dir}/${applabel}"
+echo " Installing into $INSTALLDIR"
+cp -rf $TMPDIR $INSTALLDIR
+
+if [ -n "$postinstall" ]; then
+	echo " Running postinstall scripts"
+	cd $INSTALLDIR
+	( exec "./${postinstall}" )
+fi
+
+echo " Creating symlink in /usr/bin"
+ln -s "${INSTALLDIR}/${main_exec}" /usr/bin/${main_exec_cmd} 
+
+read -p " Would you like an application shortcut created ? (Y/n) " app_shortcut
+if [ "$app_shortcut" != 'n' ] && [ "$app_shortcut" != 'N' ]; then
+	echo " Creating app shortcut"
+	touch /usr/share/applications/${applabel}.desktop
+	
+fi
+
 exit 0
 #install_template_end
 }
