@@ -34,9 +34,31 @@ exit 0
 #install_template_end
 }
 
+ulicfg_template_start() {
+appname="Example ULI App"
+version=0.1.0
+applabel="example-uli-app"
+executables="example-uli-app.bin"
+
+apt_deps="bash dash tar"
+pacman_deps="bash dash tar"
+yum_deps="bash dash tar"
+
+# Modern Linux distros prefer /usr/share over /opt, but it's upto you
+#install_dir="/opt"
+install_dir="/usr/share"
+#ulicfg_template_end
+}
+
 uli_init () {
 	DIR=$1
 	echo "  Distribution directory is : ${1}"
+	if [ -e ${1}/uli.cfg ]; then
+		echo "  ULI already configured in this directory"
+		exit 1
+	fi
+	touch ${1}/uli.cfg
+	sed -e '1,/ulicfg_template_start/d' -e '/ulicfg_template_end/,$d' $0 >> ${1}/uli.cfg
 	exit 0
 }
 
