@@ -24,6 +24,16 @@ help () {
 	exit 1
 }
 
+install_template_start() {
+#!/bin/bash
+export TMPDIR=`mktemp -d /tmp/uli.XXXXXX`
+echo " Temporarily extracting to ${TMPDIR}"
+ARCHIVE=`awk '/^__ARCHIVE_STARTS__/ {print NR + 1; exit 0; }' $0`
+tail -n+$ARCHIVE $0 | tar xv -C $TMPDIR
+exit 0
+#install_template_end
+}
+
 uli_init () {
 	DIR=$1
 	echo "  Distribution directory is : ${1}"
@@ -34,6 +44,13 @@ uli_create () {
 	DIR=$1
 	ULI=$2
 	echo "  Distribution directory is : ${1}"
+	echo "  ULI file will be at ${2}"
+	rm -rf ${2}
+	touch ${2}
+	sed -e '1,/install_template_start/d' -e '/install_template_end/,$d' $0 >> ${2}
+	echo "__ARCHIVE_STARTS__" >> ${2}
+	tar -c -C ${1} . >> ${2}
+	chmod a+x ${2}
 	exit 0
 }
 
